@@ -1,0 +1,6 @@
+build/
+dist/
+ccm.egg-info/
+/resources
+
+__pycache__/
