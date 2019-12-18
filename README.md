@@ -228,3 +228,5 @@ the very basics of each vulnerability and help you to understand in which situat
 The initial plan was to consume the *ccm* package directly from *BurpSuite's Turbo Intruder*, but unfortunately the official implementation of *Jython*
 does not support *Python3* yet. Therefore, the small *ccm* wrapper script was written to easily generate some wordlists. If you want to consume
 the functions from the *ccm* module directly, just look how the script is interacting with the library.
+
+*Copyright 2019, Tobias Neitzel and the crypted-cookie-monster contributors.*
