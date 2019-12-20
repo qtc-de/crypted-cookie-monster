@@ -21,7 +21,7 @@ If you have any ideas for improvements, feel free to contribute or submit an iss
 
 1. **Via setup.py**  
     
-    To install container-arsenal via *setup.py*, make sure you have Python 3.6 or greater installed. 
+    To install *ccm* via *setup.py*, make sure you have Python 3.6 or greater installed. 
     Then run this command from the command prompt:
 
         $ python3 setup.py install --user
@@ -33,7 +33,7 @@ If you have any ideas for improvements, feel free to contribute or submit an iss
 
         $ python3 setup.py sdist
 
-    You can then install container-arsenal via pip using:
+    You can then install *ccm* via pip using:
 
         $ pip3 install dist/ccm-1.0.0.tar.gz --user
 
