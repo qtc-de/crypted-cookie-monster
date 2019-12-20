@@ -346,27 +346,54 @@ class Crypted_cookie:
         Returns
             (start, end)        (tuple(int,int))    Sanitized values for starting and ending positions
         '''
+        length = len(self.cookie_bytearray)
+        min_size = min(self.block_sizes)
+
+        # if the start byte was not set or is smaller than zero, we start from the beginning.
         if start_byte == None or start_byte < 0:
             start = 0
-        else:
+
+        # if a start byte was set and it is located before the last block, we start from this byte.
+        elif start_byte < (length - min_size):
             start = start_byte
 
-        if end_byte == None or end_byte < 0:
-            end = len(self.cookie_bytearray) - min(self.block_sizes)
+        # in all other cases, we set the start to the first byte of the last block (deadend).
+        else:
+            start = length - min_size
+
+        # if not end byte was provided, the end byte is lower than zero or greater than the actual bytearray
+        # length, we take the beginning of the last block as end.
+        if end_byte == None or end_byte < 0 or end_byte > (length - min_size):
+            end = length - min_size
+
+        # otherwise, we use the specified end byte as the end.
         else:
             end = end_byte
 
         if start_block:
+
+            # if the start block is smaller than zero, we start from zero.
             if start_block < 0:
                 start = 0
-            else:
+
+            # if the start block is located before the last block, we use it as start.
+            elif start_block < (length // min_size):
                 start = start_block * min(self.block_sizes)
 
-        if end_block:
-            if end_block < 0:
-                end = len(self.cookie_bytearray) - min(self.block_sizes)
+            # othwerwise we start on the first byte of the last block (deadend).
             else:
-                end = end_block * min(self.block_sizes)
+                start = length - min_size
+
+        if end_block:
+
+            # if the end block is smaller than zero or greater equal the second last block, we set
+            # the end to the first byte of the last block.
+            if end_block < 0 or end_block >= (length // min_size - 1):
+                end = length - min_size
+
+            # otherwise we use the specified end block as the end.
+            else:
+                end = (end_block + 1) * min(self.block_sizes)
 
         if start >= end:
             return (None, None)
