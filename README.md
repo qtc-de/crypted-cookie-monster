@@ -19,23 +19,32 @@ If you have any ideas for improvements, feel free to contribute or submit an iss
 
 ------
 
-1. **Via setup.py**  
-    
-    To install *ccm* via *setup.py*, make sure you have Python 3.6 or greater installed. 
-    Then run this command from the command prompt:
+*ccm* can be build and installed as a *pip* package. The following
+command installs *ccm* for your current user profile:
 
-        $ python3 setup.py install --user
+```console
+$ pip3 install crypted-cookie-monster
+```
 
+You can also build *ccm* from source and install it directly by using
+the following commands:
 
-2. **As pip package** (recommended)  
+```console
+$ git clone https://github.com/qtc-de/crypted-cookie-monster
+$ cd crypted-cookie-monster
+$ python3 setup.py sdist
+$ pip3 install dist/*
+```
 
-    If you want to generate a pip package instead, run the following command from the command prompt:
+Additionally, *ccm* ships a [bash-completion](./ccm/resources/bash_completion.d/ccm) script.
+The completion script is installed automatically, but relies on the [completion-helpers](https://github.com/qtc-de/completion-helpers)
+package. If *completion-helpers* is already installed, autocompletion for *ccm* should
+work after installing the pip package. Otherwise, you may need to copy the completion
+script manually:
 
-        $ python3 setup.py sdist
-
-    You can then install *ccm* via pip using:
-
-        $ pip3 install dist/ccm-1.0.0.tar.gz --user
+```console
+$ cp ccm/resources/bash_completion.d/ccm ~/.bash_completion.d
+```
 
 
 ### Usage
