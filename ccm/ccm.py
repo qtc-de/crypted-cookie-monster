@@ -10,6 +10,21 @@ class CcmException(Exception):
     '''
 
 
+def verify_blocksize(block_sizes):
+    '''
+    Verifies that the block_sizes list contains only the values 8 and/or 16.
+
+    Paramaters:
+        block_sizes                     (list[int])         List of possible blocksizes
+
+    Returns:
+        None
+    '''
+    for block_size in block_sizes:
+        if block_size != 8 and block_size != 16:
+            raise CcmException(f"Invalid blocksize '{block_size}'.")
+
+
 class CryptedCookie:
     '''
     The crypted_cookie class is used to represent an encrypted cookie. Apart from the actual value,
@@ -39,6 +54,7 @@ class CryptedCookie:
         self.cookie_bytearray = self.decode_cookie()
         self.cookie_length = len(self.cookie_bytearray)
         self.block_sizes = block_sizes if block_sizes else self.block_sizes()
+        verify_blocksize(self.block_sizes)
 
     def decode_cookie(self):
         '''
@@ -158,13 +174,18 @@ class CryptedCookie:
         if highest is None:
             highest = 255
 
-        if lowest >= highest:
+        if lowest > highest:
             return
 
         for i in range(start, end + 1):
             for j in range(lowest, highest + 1):
+
+                if self.cookie_bytearray[i] == j:
+                    continue
+
                 modified_bytearray = self.cookie_bytearray.copy()
                 modified_bytearray[i] = j
+
                 cookie_value = self.encode_cookie(modified_bytearray)
                 yield cookie_value
 
@@ -188,7 +209,7 @@ class CryptedCookie:
         length = len(desired)
 
         if len(current) != length:
-            raise CcmException("aimed_flipping_generator(... - 'current' and 'desired' need to be of the same length")
+            raise CcmException("aimed_flipping_generator(... - 'current' and 'desired' need to be of the same length.")
 
         current_bytearray = bytearray(current, "utf-8")
         desired_bytearray = bytearray(desired, "utf-8")
@@ -272,7 +293,7 @@ class CryptedCookie:
             block_count = len(blocks)
 
             start_value, end_value = self.start_and_end(None, None, start, end, block_size=blocksize, output='block')
-            if keep and (end >= block_count or end < 0 or end is None):
+            if keep and (end is None or end >= block_count or end < 0):
                 end_value = block_count
 
             blocks_to_move = range(0, block_count)
@@ -285,12 +306,13 @@ class CryptedCookie:
 
                 for ctr in range(start_value, end_value + 1):
 
+                    if ctr == block_index:
+                        continue
+
                     cookie_value = bytearray()
                     block_list = blocks.copy()
 
                     if not keep:
-                        if ctr == block_index:
-                            continue
                         del block_list[block_index]
 
                     block_list.insert(ctr, blocks[block_index])
@@ -392,7 +414,7 @@ class CryptedCookie:
         valid = False
         for i in self.block_sizes:
 
-            print(f"[+] Possible block length: {i}")
+            print(f"[+] Possible block length: {i} \t({number_of_bytes // i} blocks)")
             valid = True
 
         if not valid:
@@ -531,7 +553,7 @@ class CryptedCookie:
             end = (self.get_end_block(end_block, block_size) + 1) * block_size - 1
 
         if start > end:
-            raise CcmException(f"start_and_end(... - Start value '{start}' is greater than end value '{end}'")
+            raise CcmException(f"start_and_end(... - Start value '{start}' is greater than end value '{end}'.")
 
         if output == 'block':
             return (start // block_size, end // block_size)

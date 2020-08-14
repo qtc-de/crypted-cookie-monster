@@ -8,9 +8,13 @@ from urllib.parse import unquote
 
 # The tests specified in this file ensure that bit flipping occurs in he correct positions.
 # Furthermore, it is also used to test different cookie formats (b64, hex, b64 with url encoding).
-# To avoid too much overhead due to the generator creation, ont flipping generator can be used
+# To avoid too much overhead due to the generator creation, one flipping generator can be used
 # for mulitple tests. (Almost) each test has to be used with a 'counts' parameter, which specifies
 # the list of generator items to operator on.
+#
+# However, using counts is tricky, since ccm does not return duplicates during bitflipping. Therefore,
+# everytime a bitflip reproduces the original bytearray, it will be skipped. This is rather easy to handle
+# if the --min-byte is 0 and --max-byte is 255, however, for other cases one needs a little bit of math.
 
 sample_1 = 'MJEAhaGscNcK6zj0Tj13pocV1q6x7IaVU0AdkJ8hnHZXEfXHpDTU8Pn8BIH7iVBZRzb8NEsA1BAyvxSNjjNJ1w=='
 sample_2 = 'MJEAhaG%2bcNcK6zj0Tj13pocV1q6x7IaVU0AdkJ8hnHZXEfXHpDTU8Pn8BIH7iVBZRzb8NEsA1BAyvxSNjjNJ1w=='
@@ -19,9 +23,9 @@ sample_3 += '8950594736fc344b00d41032bf148d8e3349d7'
 
 plain_flipping_format = 'cookie_sample, counts, positions, values, format'
 plain_flipping_samples = [
-        (sample_1, [0x33, 0xff, 0xfea, 0x1fff], [0, 0, 0x0f, 0x1f], [0x33, 0xff, 0xea, 0xff], 'b64'),
-        (sample_2, [0x33, 0xff, 0xfea, 0x1fff], [0, 0, 0x0f, 0x1f], [0x33, 0xff, 0xea, 0xff], 'b64'),
-        (sample_3, [0x33, 0xff, 0xfea, 0x1fff], [0, 0, 0x0f, 0x1f], [0x33, 0xff, 0xea, 0xff], 'hex'),
+        (sample_1, [0x33, 0xfe, 0xf00, 0x1f10], [0, 0, 0x0f, 0x1f], [0x34, 0xff, 0x0f, 0x2f], 'b64'),
+        (sample_2, [0x33, 0xfe, 0xf00, 0x1f10], [0, 0, 0x0f, 0x1f], [0x34, 0xff, 0x0f, 0x2f], 'b64'),
+        (sample_3, [0x33, 0xfe, 0xf00, 0x1f10], [0, 0, 0x0f, 0x1f], [0x34, 0xff, 0x0f, 0x2f], 'hex'),
         ]
 
 offset_flipping_format = 'cookie_sample, counts, positions, values, start, stop, min, max, skipped'
@@ -58,9 +62,9 @@ block_offset_flipping_samples = [
         (sample_1, [0, 7, 9, 10, 48], [24, 24, 24, 25, 29], [0, 7, 0x53, 1, 3], 3, 5, 0, 8, 0),
         # range 3 (start: 24 byte) -> 5 (end: 48 byte) - bytes 0 -> 8
         #   iteration 144, position 40 (144 // 9 + 24) -> 0
-        #   iteration 215, position 47 (215 // 9 + 24) -> 7
-        #   iteration 216, position 48 (out of bound) -> not reached by the test
-        (sample_1, [144, 215, 216], [40, 47, 48], [0, 8, 'stopped'], 3, 5, 0, 8, 1),
+        #   iteration 214 + 1 since duplicate was skipped, position 47 (215 // 9 + 24) -> 8
+        #   iteration 215 + 1 since duplicate was skipped, position 48 (216 // 9 + 24) -> out of bound
+        (sample_1, [144, 214, 215], [40, 47, 48], [0, 8, 'stopped'], 3, 5, 0, 8, 1),
         ]
 
 
