@@ -1,31 +1,38 @@
 #!/usr/bin/python3
 
-import sys, ccm
+import sys
 import argparse 
 
-parser = argparse.ArgumentParser(description='''ccm is just a small python script which utilizes the interface of the ccm library
-                                                to assist you during security assessments on encrypted data. It can be used to generate wordlists
-                                                based on an initial input value. While the initial purpose of this tool was to deal with
-                                                encrypted cookies, it can of course also be used for any kind of encrypted data.''')
+from ccm import CryptedCookie, CcmException
 
-parser.add_argument('blob', metavar='encrypted_data', help='encrypted input value or filename')
+
+parser = argparse.ArgumentParser(description='''ccm is a command line utility that uses the ccm library to assist 
+                                                finding vulnerabilities in the handling of encrypted data. It can
+                                                be used to generate wordlists (bitflipping, block shuffling, padding
+                                                oracle) based on an initial input value. While the initial purpose of
+                                                this tool was originally to deal with encrypted cookies, it can be used
+                                                for any kind of encrypted data.''')
+
+parser.add_argument('blob', help='encrypted input value')
 parser.add_argument('--aimed-flip', dest='aimed_flip', nargs=2, default=None, metavar=('current', 'desired'), help='deterministically flip a whole string')
-parser.add_argument('--bit-flip', dest="bit_flip", action='store_true', help='create a bitflipping wordlist')
-parser.add_argument('--blocksize', metavar='int', dest="blocksize", default=None, type=int, help='blocksize of the encrypted data')
-parser.add_argument('--encoding', metavar='(b64|hex)', choices=["b64", "hex"], dest="encoding", help='encoding of the encrypted data')
-parser.add_argument('--end-block', metavar='int', dest='end_block', type=int, help='block number to end with')
-parser.add_argument('--end-byte', metavar='int', dest='end_byte', default=None, type=int, help='byte position to end with')
-parser.add_argument('--file', metavar='int', dest='end_byte', default=None, type=int, help='byte position to end with')
+parser.add_argument('--bit-flip', dest='bit_flip', action='store_true', help='create a bitflipping wordlist')
+parser.add_argument('--block-size', metavar='int', dest='blocksize', default=None, type=int, help='blocksize of the encrypted data')
+parser.add_argument('--encoding', metavar='(b64|hex)', choices=['b64', 'hex'], dest='encoding', help='encoding of the encrypted data')
+parser.add_argument('--end-block', metavar='int', dest='end_block', default=None, type=int, help='block number to end with (index, including)')
+parser.add_argument('--end-byte', metavar='int', dest='end_byte', default=None, type=int, help='byte position to end with (index, including)')
+parser.add_argument('--keep', action='store_true', help='keep the original blocks during shuffle operations')
 parser.add_argument('--max-byte', metavar='int', dest='max_byte', default=None, type=int, help='maximum byte for bitflipping attacks')
 parser.add_argument('--min-byte', metavar='int', dest='min_byte', default=None, type=int, help='minimum byte for bitflipping attacks')
 parser.add_argument('--padding', dest='padding', action='store_true', help='create a padding oracle wordlist')
-parser.add_argument('--shuffle', dest='shuffle', action='store_true', help='create a ECB block shuffle wordlist')
-parser.add_argument('--start-block', metavar='int', dest='start_block', default=None, type=int, help='block number to start with')
-parser.add_argument('--start-byte', metavar='int', dest='start_byte', default=None, type=int, help='byte position to start with')
+parser.add_argument('--shuffle', metavar='int', dest='shuffle', action='append', default=[], type=int, help='create shuffle wordlist (move 1 at the time)')
+parser.add_argument('--full-shuffle', dest='fshuffle', action='store_true', help='create a shuffle wordlist (all permutations)')
+parser.add_argument('--start-block', metavar='int', dest='start_block', default=None, type=int, help='block number to start with (index, including)')
+parser.add_argument('--start-byte', metavar='int', dest='start_byte', default=None, type=int, help='byte position to start with (index, including)')
+
 
 def main():
     '''
-    Starts car. The exact process is mainly controlled by its command line paramaters
+    Start ccm. Behavior is controlled by the arguments received from argparse
 
     Parameters:
         None
@@ -39,39 +46,46 @@ def main():
     if args.blocksize:
         blocksize = [args.blocksize]
 
-    cookie = ccm.Crypted_cookie(args.blob, blocksize, args.encoding)
+    try:
+        cookie = CryptedCookie(args.blob, blocksize, args.encoding)
 
-    if args.aimed_flip:
+        if args.aimed_flip:
+            current = args.aimed_flip[0]
+            desired = args.aimed_flip[1]
+            generator = cookie.aimed_flipping_generator(current, desired, args.start_byte, args.end_byte, args.start_block, args.end_block)
 
-        current = args.aimed_flip[0]
-        desired = args.aimed_flip[1]
-        if len(current) != len(desired):
-            print("[-] Error! Parameter 'current' needs to be the same length as parameter 'desired'")
-            sys.exit(1)
+        elif args.bit_flip:
+            generator = cookie.flipping_generator(args.start_byte, args.end_byte, args.start_block, args.end_block, args.min_byte, args.max_byte)
 
-        generator = cookie.aimed_flipping_generator(current, desired, args.start_byte, args.end_byte, args.start_block, args.end_block)
+        elif args.padding:
+            generator = cookie.padding_generator()
+
+        elif args.fshuffle:
+
+            if args.start_byte or args.end_byte:
+                raise CcmException("Shuffle operations only allow '--start-block' or '--end-block' to be used.")
+
+            generator = cookie.full_shuffeling_generator(args.start_block, args.end_block)
+
+        elif args.shuffle:
+
+            if args.start_byte or args.end_byte:
+                raise CcmException("Shuffle operations only allow '--start-block' or '--end-block' to be used.")
+
+            generator = cookie.shuffeling_generator(args.start_block, args.end_block, args.shuffle, args.keep)
+
+        else:
+            cookie.print_info()
+            sys.exit(0)
+
         for item in generator:
             print(item)
 
-    elif args.bit_flip:
-        generator = cookie.flipping_generator(args.start_byte, args.end_byte, args.start_block, args.end_block, args.min_byte, args.max_byte)
-        for item in generator:
-            print(item)
+        sys.exit(0)
 
-    elif args.padding:
-        generator = cookie.padding_generator()
-        for item in generator:
-            print(item)
-
-    elif args.shuffle:
-        generator = cookie.shuffeling_generator()
-        for item in generator:
-            print(item)
-
-    else:
-        cookie.print_info()
-
-    sys.exit(0)
+    except CcmException as e:
+        print('[-] Error: ' + str(e))
+        sys.exit(1)
 
 
 if __name__ == '__main__': 
