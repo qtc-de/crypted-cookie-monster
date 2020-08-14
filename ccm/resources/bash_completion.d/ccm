@@ -5,47 +5,25 @@ type _comp_contains &> /dev/null || return
 type _comp_remove_list &> /dev/null || return
 type _comp_filter_shorts &> /dev/null || return
 
-function attack_mode() {
-	# when a certain attack mode was specified, we need to remove / add some attack-specific
-	# options. This is done by this function.
-	tmp=$@
-
-	for var in $(echo ${COMP_LINE} | sed -e 's/ /\n/g'); do
-		if [[ "$var" == "--aimed-flip" ]] || [[ "$var" == "--bit-flip" ]]; then
-			tmp="$tmp --end-block"
-			tmp="$tmp --end-byte"
-			tmp="$tmp --start-block"
-			tmp="$tmp --start-byte"
-			tmp=$(remove_attack_modes $tmp)
-		fi
-
-		if [[ "$var" == "--bit-flip" ]]; then
-			tmp="$tmp --min-byte"
-			tmp="$tmp --max-byte"
-		elif [[ "$var" == "--padding" ]] || [[ "$var" == "--shuffle" ]]; then
-			tmp=$(remove_attack_modes $tmp)
-		fi
-	done
-
-	echo $tmp
-}
-
 function _ccm() {
 
-    local cur prev words cword cline attack_modes not_complete
+    local cur prev words cword cline attack_modes not_complete byte_pos block_pos
 
     _init_completion || return
-    _count_args 
 
     cline="${COMP_LINE}"
     COMPREPLY=()
 
-    attack_modes="--aimed-flip --bit-flip --padding --shuffle"
-    not_complete="--aimed-flip --start-block --start-byte --end-block --end-byte --min-byte --max-byte"
+    byte_pos="--start-byte --end-byte"
+    block_pos="--start-block --end-block"
+    attack_modes="--aimed-flip --bit-flip --padding --shuffle --full-shuffle"
+    not_complete="--aimed-flip --start-block --start-byte --end-block --end-byte --min-byte --max-byte --shuffle"
 
     # complete supported block sizes
-	if [[ "$prev" == "--blocksize" ]]; then
-		opts="8 16 32"
+	if [[ "$prev" == "--block-size" ]]; then
+		opts="8 16"
+        mapfile -t COMPREPLY < <(compgen -W "${opts}" -- "${cur}") 
+        return 0
 
     # when we are in the second arg of --aimed-flip, complete nothing
     elif [[ ${words[$((cword - 2))]} == "--aimed-flip" ]]; then
@@ -54,12 +32,40 @@ function _ccm() {
     # complete possible encodings
 	elif [[ "$prev" == "--encoding" ]]; then
 		opts="b64 hex"
+        mapfile -t COMPREPLY < <(compgen -W "${opts}" -- "${cur}") 
+        return 0
 
 	# when an options requires a non guessable argument, complete nothing
 	elif _comp_contains "$not_complete" "$prev"; then
 		return 0
 
     elif _comp_contains "--aimed-flip --bit-flip"; then
+        opts="$byte_pos $block_pos"
+
+        if _comp_contains "--bit-flip"; then
+            opts="$opts --max-byte --min-byte"
+        fi
+
+        if _comp_contains "$cline" "--end-byte"; then
+            _comp_remove_list "opts" "--end-block"
+        elif _comp_contains "$cline" "--end-block"; then
+            _comp_remove_list "opts" "--end-byte"
+        fi
+
+        if _comp_contains "$cline" "--start-byte"; then
+            _comp_remove_list "opts" "--start-block"
+        elif _comp_contains "$cline" "--start-block"; then
+            _comp_remove_list "opts" "--start-byte"
+        fi
+
+    elif _comp_contains "--shuffle"; then
+        opts="$block_pos --keep"
+
+    elif _comp_contains "--full-shuffle"; then
+        opts="$block_pos"
+
+    elif _comp_contains "--padding"; then
+        opts=""
 
 	else 
         opts=$(_parse_help "$1")
@@ -69,6 +75,7 @@ function _ccm() {
         _comp_remove_list "opts" "$attack_modes";
     fi
 
+    opts="$opts --block-size -h --help"
     _comp_filter "opts"
     _comp_filter_shorts "opts"
 
