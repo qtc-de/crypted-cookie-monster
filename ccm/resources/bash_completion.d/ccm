@@ -1,53 +1,9 @@
 #!/bin/bash
 
-function contains() {
-	# Checks whether a certain string is contained inside a list of strings.
-    if [[ $1 =~ (^|[[:space:]])$2($|[[:space:]]) ]]; then
-		return 0
-	else
-		return 1
-	fi
-}
-
-function clean() {
-	# Arguments that were already specified on the command line should be removed from
-	# the list of possible completions. This is done by this function.
-
-	tmp=$@
-
-	# iterate over each word inside the current command line
-	for var in $(echo ${COMP_LINE} | sed -e 's/ /\n/g'); do
-
-		# exclude the current word to allow full specified options to be space completed
-		if [[ "$var" == "$cur" ]]; then
-			continue;
-		fi
-		
-		# check if a command line word matches an option and remove it
-		for word in $tmp; do
-			if [[ "$word" == "$var" ]]; then
-				tmp=( "${tmp/${var}}" )
-				break
-			fi
-		done
-	done
-
-	echo $tmp
-}
-
-function remove_attack_modes() {
-	# removes all attack modes from the completion list
-	tmp=$@
-
-	local attack_modes
-	attack_modes="--aimed-flip --bit-flip --padding --shuffle"
-
-	for mode in $attack_modes; do
-		tmp=( "${tmp/${mode}}" )
-	done
-
-	echo $tmp
-}
+type _comp_filter &> /dev/null || return
+type _comp_contains &> /dev/null || return
+type _comp_remove_list &> /dev/null || return
+type _comp_filter_shorts &> /dev/null || return
 
 function attack_mode() {
 	# when a certain attack mode was specified, we need to remove / add some attack-specific
@@ -76,56 +32,45 @@ function attack_mode() {
 
 function _ccm() {
 
+    local cur prev words cword cline attack_modes not_complete
 
-	local opts cur first prev prev2
+    _init_completion || return
+    _count_args 
 
-	first="${COMP_WORDS[0]}"
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD - 1]}"
-    prev2="${COMP_WORDS[COMP_CWORD - 2]}"
-
+    cline="${COMP_LINE}"
     COMPREPLY=()
 
-	# when the file option was used, we return filenames
-	if [[ "$prev" == "--file" ]]; then
-		compopt -o default
-		return 0
+    attack_modes="--aimed-flip --bit-flip --padding --shuffle"
+    not_complete="--aimed-flip --start-block --start-byte --end-block --end-byte --min-byte --max-byte"
 
-	# when aimed flipping is used, we reaturn an example argument
-	elif [[ "$prev" == "--aimed-flip" ]]; then
-		opts="current"
+    # complete supported block sizes
+	if [[ "$prev" == "--blocksize" ]]; then
+		opts="8 16 32"
 
-	# when aimed flipping is used, we reaturn an example argument
-	elif [[ "$prev2" == "--aimed-flip" ]]; then
-		opts="desired"
+    # when we are in the second arg of --aimed-flip, complete nothing
+    elif [[ ${words[$((cword - 2))]} == "--aimed-flip" ]]; then
+        return 0
 
-	# when the blocksize option is used, we return valid blocksizes
-	elif [[ "$prev" == "--blocksize" ]]; then
-		opts="8"
-		opts="$opts 16"
-		opts="$opts 32"
-
-	# when the encoding option is used, we return valid encodings
+    # complete possible encodings
 	elif [[ "$prev" == "--encoding" ]]; then
-		opts="b64"
-		opts="$opts hex"
+		opts="b64 hex"
 
 	# when an options requires a non guessable argument, complete nothing
-	elif contains "--start-block --start-byte --end-block --end-byte --min-byte --max-byte" $prev; then
+	elif _comp_contains "$not_complete" "$prev"; then
 		return 0
 
-	# otherwise, we just complete options
+    elif _comp_contains "--aimed-flip --bit-flip"; then
+
 	else 
-		opts="$opts --aimed-flip"
-		opts="$opts --bit-flip"
-		opts="$opts --blocksize"
-		opts="$opts --encoding"
-		opts="$opts --file"
-		opts="$opts --padding"
-		opts="$opts --shuffle"
-		opts=$(attack_mode $opts)
-		opts=$(clean $opts)
+        opts=$(_parse_help "$1")
 	fi
+
+    if _comp_contains "$cline" "$attack_modes"; then
+        _comp_remove_list "opts" "$attack_modes";
+    fi
+
+    _comp_filter "opts"
+    _comp_filter_shorts "opts"
 
 	mapfile -t COMPREPLY < <(compgen -W "${opts}" -- "${cur}") 
 	return 0
