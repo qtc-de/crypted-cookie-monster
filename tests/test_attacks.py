@@ -47,6 +47,7 @@ aimed_flipping_samples = [
         (sample_3_cbc, '=0&', '=1&', 1, 3, '&isadmin=1&'),
 ]
 
+
 @pytest.mark.parametrize(aimed_flipping_format, aimed_flipping_samples)
 def test_aimed_flipping(crypted, current, desired, start, end, check):
 
@@ -62,7 +63,7 @@ def test_aimed_flipping(crypted, current, desired, start, end, check):
         if check.encode('utf-8') in item:
             result = True
 
-    assert result == True
+    assert result is True
 
 
 #####################################################################
@@ -75,6 +76,7 @@ bit_flipping_samples = [
         (sample_3_cbc, 0, 3, '&isadmin=1&'),
         (sample_3_cbc, 1, 3, '&isadmin=1&'),
 ]
+
 
 @pytest.mark.parametrize(bit_flipping_format, bit_flipping_samples)
 def test_bit_flipping(crypted, start, end, check):
@@ -91,7 +93,7 @@ def test_bit_flipping(crypted, start, end, check):
         if check.encode('utf-8') in item:
             result = True
 
-    assert result == True
+    assert result is True
 
 
 #####################################################################
@@ -106,6 +108,7 @@ shuffle_samples = [
         (sample_4_ecb, 0, 2, [3], '&isadmin=1;'),
         (sample_4_ecb, 2, 2, [3], '&isadmin=1;'),
 ]
+
 
 @pytest.mark.parametrize(shuffle_format, shuffle_samples)
 def test_shuffeling(crypted, start, end, target_blocks, check):
@@ -122,7 +125,7 @@ def test_shuffeling(crypted, start, end, target_blocks, check):
         if check.encode('utf-8') in item:
             result = True
 
-    assert result == True
+    assert result is True
 
 
 #####################################################################
@@ -134,6 +137,7 @@ full_shuffle_samples = [
         (sample_4_ecb, 2, 3, '&isadmin=1;'),
         (sample_4_ecb, 2, 4, '&isadmin=1;'),
 ]
+
 
 @pytest.mark.parametrize(full_shuffle_format, full_shuffle_samples)
 def test_full_shuffeling(crypted, start, end, check):
@@ -150,14 +154,15 @@ def test_full_shuffeling(crypted, start, end, check):
         if check.encode('utf-8') in item:
             result = True
 
-    assert result == True
+    assert result is True
 
 
 #####################################################################
 #                          Padding Oracle                           #
 #####################################################################
 padding_format = "crypted, padding"
-padding_samples = [(sample_1_cbc, 0x5), (sample_2_cbc, 0x9), (sample_3_cbc, 0xa) ]
+padding_samples = [(sample_1_cbc, 0x5), (sample_2_cbc, 0x9), (sample_3_cbc, 0xa)]
+
 
 @pytest.mark.parametrize(padding_format, padding_samples)
 def test_padding(crypted, padding):
