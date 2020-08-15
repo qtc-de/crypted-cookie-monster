@@ -17,7 +17,7 @@ function _ccm() {
     byte_pos="--start-byte --end-byte"
     block_pos="--start-block --end-block"
     attack_modes="--aimed-flip --bit-flip --padding --shuffle --full-shuffle"
-    not_complete="--aimed-flip --start-block --start-byte --end-block --end-byte --min-byte --max-byte --shuffle --help -h"
+    not_complete="--aimed-flip --start-block --start-byte --end-block --end-byte --min-byte --max-byte --help -h --block"
 
     # complete supported block sizes
 	if [[ "$prev" == "--block-size" ]]; then
@@ -60,7 +60,7 @@ function _ccm() {
         fi
 
     elif _comp_contains "$cline" "--shuffle"; then
-        opts="$block_pos --keep"
+        opts="$block_pos --keep --block"
 
     elif _comp_contains "$cline" "--full-shuffle"; then
         opts="$block_pos"
@@ -77,7 +77,7 @@ function _ccm() {
     fi
 
     opts="$opts --block-size -h --help"
-    _comp_filter "opts"
+    _comp_filter "opts" "--block"
     _comp_filter_shorts "opts"
 
 	mapfile -t COMPREPLY < <(compgen -W "${opts}" -- "${cur}") 
