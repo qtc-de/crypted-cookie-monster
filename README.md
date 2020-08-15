@@ -9,7 +9,7 @@ of the following vulnerabilities is supported:
 * [Bitflipping on CBC Ciphers](#bit-flipping)
 * [Aimed Bitflipping on CBC Ciphers](#aimed-flipping)
 * [Padding Oracle Vulnerabilities](#padding-oracle)
-* [Block Shuffling on ECB Ciphers](#block-shuffeling)
+* [Block Shuffling on ECB Ciphers](#block-shuffling)
 
 Providing an encrypted sample, *ccm* can assist you by creating wordlists, that could trigger an unwanted behavior inside of the application
 that handles the encrypted data. Some example vulnerabilities can be found in the [Vulnerability Descriptions section](#vulnerability-descriptions).
@@ -83,7 +83,7 @@ Currently, only the block sizes ``8`` and ``16`` are supported, but this should 
 allows a blocksize of ``16``. Theoretically, using larger block sizes should also be possible, but was not tested so far. If required, you can just
 patch the code accordingly.
 
-For some operations (*aimed flipping*, *block-shuffeling*, *padding oracle*) the actual block size of the encrypted data play an important role. If
+For some operations (*aimed flipping*, *block-shuffling*, *padding oracle*) the actual block size of the encrypted data play an important role. If
 multiple block sizes are possible, *ccm* will always default to using both and outputs wordlists for ``8`` byte and ``16`` byte block sizes.
 In situations where you are confident about the block size of the encrypted sample, you can specify the block size manually by using the ``--block-size``
 option.
@@ -91,7 +91,7 @@ option.
 
 #### Bit Flipping
 
-By using the paramater ``--bit-flip`` *ccm* will systematically flip single bits inside the provided sample and print the corresponding modified value:
+By using the parameter ``--bit-flip`` *ccm* will systematically flip single bits inside the provided sample and print the corresponding modified value:
 
 ```console
 [qtc@kali ~]$ ccm --bit-flip 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28 | head
@@ -107,9 +107,9 @@ By using the paramater ``--bit-flip`` *ccm* will systematically flip single bits
 09910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
 ```
 
-Using the ``--start-byte`` and ``--end-byte`` or ``--start-block`` and ``--end-block`` paramaters, it is possible to control the area of the sample that is affected
+Using the ``--start-byte`` and ``--end-byte`` or ``--start-block`` and ``--end-block`` parameters, it is possible to control the area of the sample that is affected
 by the flipping process. The specified numbers are interpreted as indices on the bytearray of the provided sample. Therefore, the option ``--end-byte 2`` stops after
-modifying the thrid byte (index 2) of the sample. Furthermore, the maximum and minimum byte during flipping operations can be controlled via the ``--min-byte`` and ``--max-byte`` paramaters.
+modifying the third byte (index 2) of the sample. Furthermore, the maximum and minimum byte during flipping operations can be controlled via the ``--min-byte`` and ``--max-byte`` parameter.
 
 ```console
 [qtc@kali ~]$ ccm --bit-flip --min-byte 5 --max-byte 7 --end-byte 2 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
@@ -168,7 +168,7 @@ probably leads to a padding error (different error message than for correct padd
 ```
 
 
-#### Block Shuffeling
+#### Block Shuffling
 
 When using *ccm* with the ``--shuffle`` option, it switches the block position one at the time. Consider the original block structure is like
 this ``ABCDEFG``, where each character represents an individual 8 or 16 byte block. **ccm** will now start at the first block and move it to
@@ -207,7 +207,7 @@ and ``--end-block``.
 ```
 
 
-#### Full Block Shuffeling
+#### Full Block Shuffling
 
 In contrast to the ``--shuffle`` option, which only moves one block at the time, the ``--full-shuffle`` option returns all possible permutations of blocks contained inside the encrypted sample.
 
@@ -225,7 +225,7 @@ In contrast to the ``--shuffle`` option, which only moves one block at the time,
 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c764736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e285711f5c7a434d4f0f9fc0481fb895059
 ```
 
-Using the ``--start-block`` and ``--end-block`` paramaters, the permutation area can be controlled.
+Using the ``--start-block`` and ``--end-block`` parameters, the permutation area can be controlled.
 
 ```console
 [qtc@kali ~]$ ccm --block-size 16 --full-shuffle --start-block 1 --end-block 2 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28 
