@@ -17,7 +17,7 @@ function _ccm() {
     byte_pos="--start-byte --end-byte"
     block_pos="--start-block --end-block"
     attack_modes="--aimed-flip --bit-flip --padding --shuffle --full-shuffle"
-    not_complete="--aimed-flip --start-block --start-byte --end-block --end-byte --min-byte --max-byte --shuffle"
+    not_complete="--aimed-flip --start-block --start-byte --end-block --end-byte --min-byte --max-byte --shuffle --help -h"
 
     # complete supported block sizes
 	if [[ "$prev" == "--block-size" ]]; then
@@ -39,11 +39,12 @@ function _ccm() {
 	elif _comp_contains "$not_complete" "$prev"; then
 		return 0
 
-    elif _comp_contains "--aimed-flip --bit-flip"; then
-        opts="$byte_pos $block_pos"
+    elif _comp_contains "$cline" "--aimed-flip --bit-flip --max-byte --min-byte $byte_pos"; then
+        opts="$byte_pos $block_pos --aimed-flip --bit-flip"
 
-        if _comp_contains "--bit-flip"; then
-            opts="$opts --max-byte --min-byte"
+        if _comp_contains "$cline" "--bit-flip --max-byte --min-byte"; then
+            _comp_remove_list "opts" "--aimed-flip";
+            opts="$opts --max-byte --min-byte --bit-flip"
         fi
 
         if _comp_contains "$cline" "--end-byte"; then
@@ -58,13 +59,13 @@ function _ccm() {
             _comp_remove_list "opts" "--start-byte"
         fi
 
-    elif _comp_contains "--shuffle"; then
+    elif _comp_contains "$cline" "--shuffle"; then
         opts="$block_pos --keep"
 
-    elif _comp_contains "--full-shuffle"; then
+    elif _comp_contains "$cline" "--full-shuffle"; then
         opts="$block_pos"
 
-    elif _comp_contains "--padding"; then
+    elif _comp_contains "$cline" "--padding"; then
         opts=""
 
 	else 
