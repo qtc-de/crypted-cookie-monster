@@ -55,7 +55,7 @@ $ cp ccm/resources/bash_completion.d/ccm ~/.bash_completion.d
 ------
 
 In this section, the functionalities of the [ccm wrapper script](./bin/ccm) are explained in more detail. If you want to know
-how *ccm* can be used as a python library, just check the source of the wrapper script (is damn simple, really :D). 
+how *ccm* can be used as a python library, just check the source of the wrapper script (it is damn simple, really :D). 
 
 
 #### Sample Info
@@ -63,7 +63,7 @@ how *ccm* can be used as a python library, just check the source of the wrapper 
 When using *ccm* without any arguments, it displays information about the encrypted sample.
 
 ```console
-[qtc@kali ~]$ ccm  MJEAhaGscNcK6zj0Tj13pocV1q6x7IaVU0AdkJ8hnHZXEfXHpDTU8Pn8BIH7iVBZRzb8NEsA1BAyvxSNjjNJ1ygdjaNZzeUGSXn738oV17xhWt1WOYLeC2PFqRyXFZ4o
+[qtc@kali ~]$ ccm MJEAhaGscNcK6zj0Tj13pocV1q6x7IaVU0AdkJ8hnHZXEfXHpDTU8Pn8BIH7iVBZRzb8NEsA1BAyvxSNjjNJ1ygdjaNZzeUGSXn738oV17xhWt1WOYLeC2PFqRyXFZ4o
 [+] Cookie Size: 96
 [+] Possible block length: 8 	(12 blocks)
 [+] Possible block length: 16 	(6 blocks)
@@ -79,8 +79,8 @@ The following examples will all use ``hex`` format, as it is easier to spot the 
 [+] Possible block length: 16 	(6 blocks)
 ```
 
-Currently, only the block sizes ``8`` and ``16`` are supported, but this should cover most cipher suits, as e.g. the *AES* default implementation only
-allows a blocksize of ``16``. Theoretically, using larger block sizes should also be possible, but was not tested so far. If required, you can just
+Currently, only block sizes of ``8`` and ``16`` bytes are supported, but this should cover most cipher suites, as e.g. the *AES* default implementation only
+allows a blocksize of ``16`` bytes. Theoretically, using larger block sizes should also be possible, but was not tested so far. If required, you can just
 patch the code accordingly.
 
 For some operations (*aimed flipping*, *block-shuffling*, *padding oracle*) the actual block size of the encrypted data play an important role. If
@@ -126,7 +126,7 @@ modifying the third byte (index 2) of the sample. Furthermore, the maximum and m
 
 #### Aimed Flipping
 
-Instead of flipping single bits, the ``--aimed-flip`` option can be used to flip multiple bits in parallel. This can e.g. used to flip a sequence like ``guest`` into
+Instead of flipping single bits, the ``--aimed-flip`` option can be used to flip multiple bits in parallel. This can e.g. be used to flip a sequence like ``guest`` into
 the sequence ``admin``. Of course, both sequences need to be of the same length and the targeted sequence needs to be fully contained inside a single block.
 
 ```console
@@ -144,6 +144,7 @@ the sequence ``admin``. Of course, both sequences need to be of the same length 
 ```
 
 Again, modifying the affected area inside the sample is possible by using the ``--start-byte`` and ``--end-byte`` or the ``--start-block`` and ``--end-block`` options.
+When not specifying a block size explicitly (via ``--block-size``) the resulting wordlist will cover both, the ``8`` byte and the ``16`` byte case.
 
 
 #### Padding Oracle
@@ -171,7 +172,7 @@ probably leads to a padding error (different error message than for correct padd
 #### Block Shuffling
 
 When using *ccm* with the ``--shuffle`` option, it switches the block position one at the time. Consider the original block structure is like
-this ``ABCDEFG``, where each character represents an individual 8 or 16 byte block. **ccm** will now start at the first block and move it to
+``ABCDEFG``, where each character represents an individual ``8`` or ``16`` byte block. *ccm* will now start at the first block and move it to
 all other possible positions: ``BACDEFG``, ``BCADEFG``, ``BCDAEFG``, etc. After finishing with the first block, the same operation will be
 repeated with the second block and so on.
 
@@ -189,8 +190,8 @@ repeated with the second block and so on.
 30910085a1ac70d70aeb38f44e3d77a65711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e288715d6aeb1ec869553401d909f219c76
 ```
 
-You can also select only specific blocks that should be shuffled by using the ``--block`` option. Furthermore, the positions where blocks are shuffled to can be controlled via ``--start-block``
-and ``--end-block``.
+You can also select only specific blocks that should be shuffled by using the ``--block`` option (can be used multiple times). Furthermore, the area where blocks are shuffled to can be controlled 
+via ``--start-block`` and ``--end-block``.
 
 ```console
 [qtc@kali ~]$ ccm --block-size 16 --shuffle --block 1 --block 2 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28 
