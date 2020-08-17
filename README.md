@@ -55,7 +55,7 @@ $ cp ccm/resources/bash_completion.d/ccm ~/.bash_completion.d
 ------
 
 In this section, the functionalities of the [ccm wrapper script](./bin/ccm) are explained in more detail. If you want to know
-how *ccm* can be used as a python library, just check the source of the wrapper script (it is damn simple, really :D). 
+how *ccm* can be used as a python library, just check the source of the wrapper script (it is damn simple, really :D).
 
 
 #### Sample Info
@@ -190,11 +190,11 @@ repeated with the second block and so on.
 30910085a1ac70d70aeb38f44e3d77a65711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e288715d6aeb1ec869553401d909f219c76
 ```
 
-You can also select only specific blocks that should be shuffled by using the ``--block`` option (can be used multiple times). Furthermore, the area where blocks are shuffled to can be controlled 
+You can also select only specific blocks that should be shuffled by using the ``--block`` option (can be used multiple times). Furthermore, the area where blocks are shuffled to can be controlled
 via ``--start-block`` and ``--end-block``.
 
 ```console
-[qtc@kali ~]$ ccm --block-size 16 --shuffle --block 1 --block 2 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28 
+[qtc@kali ~]$ ccm --block-size 16 --shuffle --block 1 --block 2 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
 8715d6aeb1ec869553401d909f219c7630910085a1ac70d70aeb38f44e3d77a65711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
 30910085a1ac70d70aeb38f44e3d77a65711f5c7a434d4f0f9fc0481fb8950598715d6aeb1ec869553401d909f219c764736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
 30910085a1ac70d70aeb38f44e3d77a65711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d78715d6aeb1ec869553401d909f219c76281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
@@ -229,7 +229,7 @@ In contrast to the ``--shuffle`` option, which only moves one block at the time,
 Using the ``--start-block`` and ``--end-block`` parameters, the permutation area can be controlled.
 
 ```console
-[qtc@kali ~]$ ccm --block-size 16 --full-shuffle --start-block 1 --end-block 2 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28 
+[qtc@kali ~]$ ccm --block-size 16 --full-shuffle --start-block 1 --end-block 2 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
 30910085a1ac70d70aeb38f44e3d77a68715d6aeb1ec869553401d909f219c765711f5c7a434d4f0f9fc0481fb8950594736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
 30910085a1ac70d70aeb38f44e3d77a65711f5c7a434d4f0f9fc0481fb8950598715d6aeb1ec869553401d909f219c764736fc344b00d41032bf148d8e3349d7281d8da359cde5064979fbdfca15d700615add563982de0b63c5a91c97159e28
 ```
@@ -243,37 +243,37 @@ There are many well written articles that describe the vulnerabilities that this
 the very basics of each vulnerability and help you to understand in which situations *ccm* could be useful.
 
 1. **Bitflipping against CBC ciphers**
-    
+
     *Cipher-Block-Chaining (CBC)* is a very popular encryption mode for block ciphers, that prevents remarkable patterns when encrypting similar portions of text.
     In contrast to the *Electronic Code Book Mode (ECB)*, different blocks influence each other, since previously generated ciphertext is *XORed* with plaintext before the encryption.
 
-    ![cbc-mode-encryption](/images/01-cbc-mode-encryption.png)
+    ![cbc-mode-encryption](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/01-cbc-mode-encryption.png)
 
     Obviously, the decryption process has to implement the inverse operation to recover the original plaintext:
 
-    ![cbc-mode-decryption](images/02-cbc-mode-decryption.png)
+    ![cbc-mode-decryption](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/02-cbc-mode-decryption.png)
 
     One interisting point about CBC ciphers is that the *XOR* process allows deterministic changes on the actual plaintext by modifying the ciphertext.
     In the following example the second last byte inside the first ciphertext block is modified.
 
-    ![cbc-manipulation](images/03-cbc-manipulation.png)
+    ![cbc-manipulation](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/03-cbc-manipulation.png)
 
     Due to the nature of a good block cipher, this will completely destroy the actual plaintext that was contained inside the first block. However, on the second block
     the modified ciphertext does only cause a minimal change that is fully predictable for an attacker.
 
-    During a *bitflipping* attack, each byte of the ciphertext is iterated over all possible values. As mentioned above, this procedure always invalidates one block of the actual plaintext, but 
+    During a *bitflipping* attack, each byte of the ciphertext is iterated over all possible values. As mentioned above, this procedure always invalidates one block of the actual plaintext, but
     possibly leads to desirable effects on the following block. Common examples are flags like ``login=0``, which can easily be flipped into ``login=1`` using the *bitflipping* method.
 
 
 2. **Aimed Bitflipping against CBC ciphers**
 
 
-    While ordinary *bitflipping* can be sufficient to change a flag like ``login=0`` into ``login=1``, it will not allow more complex changes on the actual plaintext. 
+    While ordinary *bitflipping* can be sufficient to change a flag like ``login=0`` into ``login=1``, it will not allow more complex changes on the actual plaintext.
     To allow more complex changes, it is required to flip more than one byte inside the ciphertext, which is just not a reasonable approach if done on a pure bruteforce basis.
     However, in cases where you have additional information about the encrypted data, even more complex changes become deterministically possible.
 
     As an example, consider you know that the encrypted plaintext contains the parameter ``admin=False``. In this case, it is easy to calculate the required changes on the ciphertext
-    to turn the parameter into ``admin=True;``. 
+    to turn the parameter into ``admin=True;``.
 
         Ciphertext ⊕ Decrypt = 'False'
         Ciphertext ⊕ Decrypt ⊕ ('False' ⊕ 'True;') = 'False' ⊕ ('False' ⊕ 'True;')
@@ -289,23 +289,23 @@ the very basics of each vulnerability and help you to understand in which situat
 3. **Block Shuffling against ECB ciphers**
 
     In contrast to *Cipher-Block-Chaining (CBC)* mode, when encrypting with *Electronic-Code-Book (ECB)* mode, different blocks do not influence each other. This is usually not desirable, since
-    equal portions of plaintext are encrypted into the same ciphertext. The following graphic visualizes an encryption process in *ECB* mode: 
+    equal portions of plaintext are encrypted into the same ciphertext. The following graphic visualizes an encryption process in *ECB* mode:
 
-    ![ecb-encryption](images/07-ecb-encryption.png) 
+    ![ecb-encryption](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/07-ecb-encryption.png)
 
     The decryption process looks of course similar and this opens another interisting attack vector on *ECB* ciphers. Since all blocks are decrypted independent from each other, it is possible
     to rearrange the ordering of the different blocks while still keeping the original plaintext alive. Of course, the ordering of the different plaintext blocks will be different, but this may
-    lead to desirable effects as demonstrated in the following graphic: 
+    lead to desirable effects as demonstrated in the following graphic:
 
-    ![ecb-decryption](images/08-ecb-encryption.png)
+    ![ecb-decryption](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/08-ecb-encryption.png)
 
 4. **Padding Oracle**
 
     One obvious property of block ciphers is that they operate on a certain blocksize of data. E.g. in the graphics above, the blocksize was chosen to be 8 bytes and each plaintext/ciphertext
-    block has to match exactly this size. But what happens when you want to encrypt data that does not match this blocksize? In this case, a padding procedure (usually *PKCS#7*) is applied. 
-    The following graphic shows how an insufficiently long plaintext is padded to the required size: 
+    block has to match exactly this size. But what happens when you want to encrypt data that does not match this blocksize? In this case, a padding procedure (usually *PKCS#7*) is applied.
+    The following graphic shows how an insufficiently long plaintext is padded to the required size:
 
-    ![padding](images/04-padding.png) 
+    ![padding](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/04-padding.png)
 
     As you can see, the padding procedure is quite simple. The missing number of bytes (*n*) is just appended to the plaintext, all with a value of *n*. During decryption, the cipher just needs to
     check for this kind of padding and needs to remove the last *n* bytes from the plaintext. However, there is one problem with plaintext that matches exactly a multiple of the blocksize. In this
@@ -314,9 +314,9 @@ the very basics of each vulnerability and help you to understand in which situat
 
     If encrypted data was incorrectly padded, there will be an error during the decryption process and this is exactly where you can find *Padding Oracle* vulnerabilities. If an application reacts
     differently to correctly and incorrectly padded data, and if this difference can be noticed by the enduser, it is possible to break the encryption. The following graphics show an example of this
-    situation, where the goal is to decrypt an encrypted block of 8 bytes (displayed in grey). 
+    situation, where the goal is to decrypt an encrypted block of 8 bytes (displayed in grey).
 
-    ![padding-oralce](images/05-padding-oracle.png)
+    ![padding-oralce](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/05-padding-oracle.png)
 
     In order to abuse the *Padding Oracle* the attacker prefixes the encrypted ciphertext with another block of random data. Since this block is *XORed* with the decrypted ciphertext, the resulting padding
     will most likely be wrong and does not match the *PKCS#7* specification. Since the application is vulnerable, it will return an error message that indicates the malformed padding.
@@ -324,7 +324,7 @@ the very basics of each vulnerability and help you to understand in which situat
     Now the last byte of the prefixed block is iterated over all possible values. For one certain value, the result of the *XOR* process will lead to a correct padding (0x01 at the end)
     and the application reacts with a different error message (Notice that there is the small probability that more than one value leads to a correct padding, but this should be really rare.)
 
-    ![padding-oracle-2](images/06-padding-oracle.png)
+    ![padding-oracle-2](https://github.com/qtc-de/crypted-cookie-monster/raw/master/images/06-padding-oracle.png)
 
     As shown in the picture above, it is now very simple to calculated the actual plaintext value. This can now be done byte per byte until the whole ciphertext is decrypted.
 
