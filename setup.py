@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from os import makedirs
 from os.path import expanduser, abspath, dirname, isdir, isfile
 from shutil import copy
 
@@ -62,7 +61,7 @@ setup(
     long_description_content_type="text/markdown",
 
     packages=['ccm'],
-    package_data = {
+    package_data={
                         'ccm': [
                             'resources/*',
                             'resources/bash_completion.d/*',
@@ -73,7 +72,7 @@ setup(
                 'bin/ccm',
             ],
     cmdclass={
-                'install': PostInstallCommand,
+                'install': PostInstall,
              },
 
     classifiers=[
